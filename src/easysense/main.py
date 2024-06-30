@@ -1,6 +1,6 @@
 import argparse
 import asyncio
-import importlib
+import importlib.util
 import inspect
 import logging
 import os
@@ -13,7 +13,7 @@ from typing import Optional, List
 import yaml
 from wiresense import Wiresense
 
-import cli
+from . import cli
 from easysense import Easysense
 
 # Constants
@@ -58,7 +58,6 @@ def load_config() -> None:
 
     global config
     config.update(user_config)
-
 
 
 def load_sensors() -> None:
