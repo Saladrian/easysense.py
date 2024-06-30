@@ -1,0 +1,5 @@
+/src/easysense/logs/
+/.venv/
+/tests/
+/.idea/
+/data/

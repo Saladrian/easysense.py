@@ -1,0 +1,6 @@
+# To get prompted every time, just set the value to it's default or remove the line
+selected_sensor: ""  # Exact name of the sensor (see /sensors folder for the names) (Default: "")
+read_interval: -1  # Measurement inverval in seconds (Default: -1)
+print_data_in_cmd: null  # Boolean whether the sensor output should also be printed in the cmd (set to null to get a prompt every time)
+
+csv_folder_path: "./data"  # Where to say all created csv files. (For best functionality, use absolute path) (!!! Here you wont ever be prompted (Default "./data"))

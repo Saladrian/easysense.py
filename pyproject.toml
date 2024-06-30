@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "easysense"
+version = "1.0.7"
+authors = [
+    { name="Saladrian" }
+]
+description = "A CLI tool providing pre-written sensor implementations for Wiresense, designed to simplify sensor integration and data collection."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pyyaml>=6.0.1",
+    "wiresense>=1.0.2",
+    "adafruit-blinka>=8.41.2"
+]
+
+[project.scripts]
+easysense = "easysense.main:main"
+
+[project.urls]
+Homepage = "https://github.com/Saladrian/easysense#readme"
+Issues = "https://github.com/Saladrian/easysense/issues"
