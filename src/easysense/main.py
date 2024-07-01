@@ -239,6 +239,8 @@ def run_program() -> None:
     os.makedirs(csv_folder, exist_ok=True)
     file_path = os.path.join(csv_folder, f"{s_name}.csv")
 
+    print("Click here to view your Data: https://wiresense.github.io/frontend/")
+
     asyncio.run(setup_wiresense(s_name, sel_interval, file_path, print_data))
 
 
@@ -270,7 +272,8 @@ def sensor_install(sensor_name: str) -> None:
     sensor_path = os.path.join(SENSOR_FOLDER, sensor_name)
     if not os.path.exists(sensor_path):
         if is_git_installed():
-            os.system(f"cd {SENSOR_FOLDER} && git fetch --all && git checkout origin/master -- {sensor_name}")
+            os.system(f"cd {SENSOR_FOLDER} && git fetch --all && git checkout origin/main -- {sensor_name}")
+            print(f"Sensor '{sensor_name}' successfully installed!")
         else:
             print("Can't download sensor: git is not installed!")
             log.error("Git is not installed!")
