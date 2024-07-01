@@ -28,4 +28,4 @@ easysense = "easysense.main:main"
 [project.urls]
 Homepage = "https://github.com/Saladrian/easysense.py#readme"
 Issues = "https://github.com/Saladrian/easysense.py/issues"
-"Available Sensors" = "https://github.com/Saladrian/easysense.py-sensors
+"Available Sensors" = "https://github.com/Saladrian/easysense.py-sensors"
