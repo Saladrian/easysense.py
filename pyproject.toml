@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "easysense"
-version = "1.0.9"
+version = "1.0.10"
 authors = [
     { name="Saladrian" }
 ]
@@ -26,5 +26,6 @@ dependencies = [
 easysense = "easysense.main:main"
 
 [project.urls]
-Homepage = "https://github.com/Saladrian/easysense#readme"
-Issues = "https://github.com/Saladrian/easysense/issues"
+Homepage = "https://github.com/Saladrian/easysense.py#readme"
+Issues = "https://github.com/Saladrian/easysense.py/issues"
+"Available Sensors" = "https://github.com/Saladrian/easysense.py-sensors

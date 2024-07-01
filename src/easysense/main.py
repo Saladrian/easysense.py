@@ -8,7 +8,8 @@ import socket
 import subprocess
 import time
 import warnings
-from typing import Optional, List
+from typing import Optional, List, Any
+
 
 import yaml
 from wiresense import Wiresense
@@ -30,6 +31,7 @@ config = {
     "csv_folder_path": "./data",  # Where to say all created csv files. (For best functionality, use absolute path)
     "print_data_in_cmd": None  # Boolean whether the sensor output should also be printed in the cmd (set to null to get a prompt every time)
 }
+active_sensors = {}
 
 # Logging config
 date = time.strftime("%d-%m-%Y")
@@ -60,6 +62,16 @@ def load_config() -> None:
     config.update(user_config)
 
 
+def load_installed_sensors() -> None:
+    for filename in os.listdir(SENSOR_FOLDER):
+        module_folder_path = os.path.normpath(os.path.join(SENSOR_FOLDER, filename))
+        if os.path.isdir(module_folder_path) and not filename.startswith("_") and not filename.startswith("."):
+            module_path = os.path.join(module_folder_path, "main.py")
+            Easysense.sensors[filename] = module_path
+    log.info(f"Loaded {len(Easysense.sensors)} sensors.")
+
+
+# Depricated
 def load_sensors() -> None:
     for filename in os.listdir(SENSOR_FOLDER):
         module_folder_path = os.path.normpath(os.path.join(SENSOR_FOLDER, filename))
@@ -83,7 +95,7 @@ def load_sensors() -> None:
     log.info(f"Loaded {len(Easysense.sensors)} sensors.")
 
 
-def ask_valid_input(prompt: str, d_type: type, *, x_range: Optional[List[float]] = None, error_msg: str = "Please enter valid data.") -> None:
+def ask_valid_input(prompt: str, d_type: type, *, x_range: Optional[List[float]] = None, error_msg: str = "Please enter valid data.") -> Any:
     user_input = input(prompt)
     try:
         value = d_type(user_input)
@@ -173,9 +185,9 @@ def select_print_data() -> bool:
     return selected_print_data
 
 
-def use_sensor(s_name: str) -> None:
-    if s_name in Easysense.sensors:
-        sensor = Easysense.sensors.get(s_name)
+def use_sensor(s_name: str) -> Easysense:
+    if s_name in active_sensors:
+        sensor = active_sensors.get(s_name)
 
         for name, obj in inspect.getmembers(sensor, inspect.isclass):
             if issubclass(obj, Easysense) and obj is not Easysense:
@@ -218,22 +230,45 @@ async def setup_wiresense(s_name, interval, csv_file_path, print_data) -> None:
         exit(0)
 
 
+def setup_sensor(sensor_name: str) -> None:
+    install_requirements(sensor_name)
+
+    spec = importlib.util.spec_from_file_location(sensor_name, Easysense.sensors.get(sensor_name))
+    module = importlib.util.module_from_spec(spec)
+
+    try:
+        spec.loader.exec_module(module)
+        log.info(f"Sensor '{sensor_name}' loaded!")
+        global active_sensors
+        active_sensors[sensor_name] = module
+    except ImportError as ie:
+        error_msg = f"There was an error importing the sensor module '{sensor_name}': {ie}"
+        print(error_msg)
+        log.error(error_msg)
+    except Exception as e:
+        warn_msg = f"Sensor '{sensor_name}' not loaded!\nExtension raised an error: {e}"
+        log.warning(warn_msg)
+        warnings.warn(warn_msg)
+
+
 def install_requirements(sensor_name: str) -> None:
     requirements_path = os.path.join(SENSOR_FOLDER, sensor_name, "requirements.txt")
     if os.path.exists(requirements_path):
+        print("Checking all modules are installed and installing those missing...")
         os.system(f"pip install -r {requirements_path}")
+        print("Done!")
 
 
 def run_program() -> None:
-    load_sensors()
-
     cli.display_start()
+
+    load_installed_sensors()
 
     s_name = select_sensor()
     sel_interval = select_interval()
     print_data = select_print_data()
 
-    install_requirements(s_name)
+    setup_sensor(s_name)
 
     csv_folder = config.get("csv_folder_path")
     os.makedirs(csv_folder, exist_ok=True)
@@ -244,7 +279,7 @@ def run_program() -> None:
     asyncio.run(setup_wiresense(s_name, sel_interval, file_path, print_data))
 
 
-def check_internet_connection() -> None:
+def check_internet_connection() -> bool:
     try:
         socket.create_connection(("1.1.1.1", 80), timeout=5)
         log.info("Internet connection available!")
@@ -254,7 +289,7 @@ def check_internet_connection() -> None:
         return False
 
 
-def is_git_installed() -> None:
+def is_git_installed() -> bool:
     try:
         result = subprocess.run(['git', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         if result.returncode == 0:
